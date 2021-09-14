@@ -191,26 +191,26 @@ static void
 dump_regs(void)
 {
 	uint64_t val;
-	kprintf("PMCR0 = 0x%" PRIx64 "\n", SREG_READ("PMCR0_EL1"));
-	kprintf("PMCR1 = 0x%" PRIx64 "\n", SREG_READ("PMCR1_EL1"));
-	kprintf("PMCR2 = 0x%" PRIx64 "\n", SREG_READ("PMCR2_EL1"));
-	kprintf("PMCR3 = 0x%" PRIx64 "\n", SREG_READ("PMCR3_EL1"));
-	kprintf("PMCR4 = 0x%" PRIx64 "\n", SREG_READ("PMCR4_EL1"));
-	kprintf("PMESR0 = 0x%" PRIx64 "\n", SREG_READ("PMESR0_EL1"));
-	kprintf("PMESR1 = 0x%" PRIx64 "\n", SREG_READ("PMESR1_EL1"));
+	kprintf("PMCR0 = 0x%" PRIx64 "\n", SREG_READ("S3_1_C15_C0_0"));
+	kprintf("PMCR1 = 0x%" PRIx64 "\n", SREG_READ("S3_1_C15_C1_0"));
+	kprintf("PMCR2 = 0x%" PRIx64 "\n", SREG_READ("S3_1_C15_C2_0"));
+	kprintf("PMCR3 = 0x%" PRIx64 "\n", SREG_READ("S3_1_C15_C3_0"));
+	kprintf("PMCR4 = 0x%" PRIx64 "\n", SREG_READ("S3_1_C15_C4_0"));
+	kprintf("PMESR0 = 0x%" PRIx64 "\n", SREG_READ("S3_1_C15_C5_0"));
+	kprintf("PMESR1 = 0x%" PRIx64 "\n", SREG_READ("S3_1_C15_C6_0"));
 
 	kprintf("PMC0 = 0x%" PRIx64 "\n", SREG_READ("PMC0"));
 	kprintf("PMC1 = 0x%" PRIx64 "\n", SREG_READ("PMC1"));
-	kprintf("PMC2 = 0x%" PRIx64 "\n", SREG_READ("PMC2"));
-	kprintf("PMC3 = 0x%" PRIx64 "\n", SREG_READ("PMC3"));
-	kprintf("PMC4 = 0x%" PRIx64 "\n", SREG_READ("PMC4"));
-	kprintf("PMC5 = 0x%" PRIx64 "\n", SREG_READ("PMC5"));
-	kprintf("PMC6 = 0x%" PRIx64 "\n", SREG_READ("PMC6"));
-	kprintf("PMC7 = 0x%" PRIx64 "\n", SREG_READ("PMC7"));
+	kprintf("S3_2_C15_C2_0 = 0x%" PRIx64 "\n", SREG_READ("S3_2_C15_C2_0"));
+	kprintf("S3_2_C15_C3_0 = 0x%" PRIx64 "\n", SREG_READ("S3_2_C15_C3_0"));
+	kprintf("S3_2_C15_C4_0 = 0x%" PRIx64 "\n", SREG_READ("S3_2_C15_C4_0"));
+	kprintf("S3_2_C15_C5_0 = 0x%" PRIx64 "\n", SREG_READ("S3_2_C15_C5_0"));
+	kprintf("S3_2_C15_C6_0 = 0x%" PRIx64 "\n", SREG_READ("S3_2_C15_C6_0"));
+	kprintf("S3_2_C15_C7_0 = 0x%" PRIx64 "\n", SREG_READ("S3_2_C15_C7_0"));
 
 #if (KPC_ARM64_CONFIGURABLE_COUNT > 6)
-	kprintf("PMC8 = 0x%" PRIx64 "\n", SREG_READ("PMC8"));
-	kprintf("PMC9 = 0x%" PRIx64 "\n", SREG_READ("PMC9"));
+	kprintf("S3_2_C15_C9_0 = 0x%" PRIx64 "\n", SREG_READ("S3_2_C15_C9_0"));
+	kprintf("S3_2_C15_C10_0 = 0x%" PRIx64 "\n", SREG_READ("S3_2_C15_C10_0"));
 #endif
 }
 #endif
@@ -221,7 +221,7 @@ enable_counter(uint32_t counter)
 	uint64_t pmcr0 = 0;
 	boolean_t counter_running, pmi_enabled, enabled;
 
-	pmcr0 = SREG_READ("PMCR0_EL1") | 0x3 /* leave the fixed counters enabled for monotonic */;
+	pmcr0 = SREG_READ("S3_1_C15_C0_0") | 0x3 /* leave the fixed counters enabled for monotonic */;
 
 	counter_running = (pmcr0 & PMCR0_PMC_ENABLE_MASK(counter)) != 0;
 	pmi_enabled = (pmcr0 & PMCR0_PMI_ENABLE_MASK(counter)) != 0;
@@ -231,7 +231,7 @@ enable_counter(uint32_t counter)
 	if (!enabled) {
 		pmcr0 |= PMCR0_PMC_ENABLE_MASK(counter);
 		pmcr0 |= PMCR0_PMI_ENABLE_MASK(counter);
-		SREG_WRITE("PMCR0_EL1", pmcr0);
+		SREG_WRITE("S3_1_C15_C0_0", pmcr0);
 	}
 
 	return enabled;
@@ -247,12 +247,12 @@ disable_counter(uint32_t counter)
 		return true;
 	}
 
-	pmcr0 = SREG_READ("PMCR0_EL1") | 0x3;
+	pmcr0 = SREG_READ("S3_1_C15_C0_0") | 0x3;
 	enabled = (pmcr0 & PMCR0_PMC_ENABLE_MASK(counter)) != 0;
 
 	if (enabled) {
 		pmcr0 &= PMCR0_PMC_DISABLE_MASK(counter);
-		SREG_WRITE("PMCR0_EL1", pmcr0);
+		SREG_WRITE("S3_1_C15_C0_0", pmcr0);
 	}
 
 	return enabled;
@@ -291,11 +291,11 @@ set_modes(uint32_t counter, kpc_config_t cfgword)
 		bits = PMCR1_EL_ALL_ENABLE_MASK(counter);
 	}
 
-	uint64_t pmcr1 = SREG_READ("PMCR1_EL1");
+	uint64_t pmcr1 = SREG_READ("S3_1_C15_C1_0");
 	pmcr1 &= PMCR1_EL_ALL_DISABLE_MASK(counter);
 	pmcr1 |= bits;
 	pmcr1 |= 0x30303; /* monotonic compatibility */
-	SREG_WRITE("PMCR1_EL1", pmcr1);
+	SREG_WRITE("S3_1_C15_C1_0", pmcr1);
 	saved_PMCR[cpuid][1] = pmcr1;
 }
 
@@ -305,15 +305,15 @@ read_counter(uint32_t counter)
 	switch (counter) {
 	// case 0: return SREG_READ("PMC0");
 	// case 1: return SREG_READ("PMC1");
-	case 2: return SREG_READ("PMC2");
-	case 3: return SREG_READ("PMC3");
-	case 4: return SREG_READ("PMC4");
-	case 5: return SREG_READ("PMC5");
-	case 6: return SREG_READ("PMC6");
-	case 7: return SREG_READ("PMC7");
+	case 2: return SREG_READ("S3_2_C15_C2_0");
+	case 3: return SREG_READ("S3_2_C15_C3_0");
+	case 4: return SREG_READ("S3_2_C15_C4_0");
+	case 5: return SREG_READ("S3_2_C15_C5_0");
+	case 6: return SREG_READ("S3_2_C15_C6_0");
+	case 7: return SREG_READ("S3_2_C15_C7_0");
 #if (KPC_ARM64_CONFIGURABLE_COUNT > 6)
-	case 8: return SREG_READ("PMC8");
-	case 9: return SREG_READ("PMC9");
+	case 8: return SREG_READ("S3_2_C15_C9_0");
+	case 9: return SREG_READ("S3_2_C15_C10_0");
 #endif
 	default: return 0;
 	}
@@ -325,15 +325,15 @@ write_counter(uint32_t counter, uint64_t value)
 	switch (counter) {
 	// case 0: SREG_WRITE("PMC0", value); break;
 	// case 1: SREG_WRITE("PMC1", value); break;
-	case 2: SREG_WRITE("PMC2", value); break;
-	case 3: SREG_WRITE("PMC3", value); break;
-	case 4: SREG_WRITE("PMC4", value); break;
-	case 5: SREG_WRITE("PMC5", value); break;
-	case 6: SREG_WRITE("PMC6", value); break;
-	case 7: SREG_WRITE("PMC7", value); break;
+	case 2: SREG_WRITE("S3_2_C15_C2_0", value); break;
+	case 3: SREG_WRITE("S3_2_C15_C3_0", value); break;
+	case 4: SREG_WRITE("S3_2_C15_C4_0", value); break;
+	case 5: SREG_WRITE("S3_2_C15_C5_0", value); break;
+	case 6: SREG_WRITE("S3_2_C15_C6_0", value); break;
+	case 7: SREG_WRITE("S3_2_C15_C7_0", value); break;
 #if (KPC_ARM64_CONFIGURABLE_COUNT > 6)
-	case 8: SREG_WRITE("PMC8", value); break;
-	case 9: SREG_WRITE("PMC9", value); break;
+	case 8: SREG_WRITE("S3_2_C15_C9_0", value); break;
+	case 9: SREG_WRITE("S3_2_C15_C10_0", value); break;
 #endif
 	default: break;
 	}
@@ -348,18 +348,18 @@ kpc_rawpmu_config_count(void)
 int
 kpc_get_rawpmu_config(kpc_config_t *configv)
 {
-	configv[0] = SREG_READ("PMCR2_EL1");
-	configv[1] = SREG_READ("PMCR3_EL1");
-	configv[2] = SREG_READ("PMCR4_EL1");
-	configv[3] = SREG_READ("OPMAT0_EL1");
-	configv[4] = SREG_READ("OPMAT1_EL1");
-	configv[5] = SREG_READ("OPMSK0_EL1");
-	configv[6] = SREG_READ("OPMSK1_EL1");
+	configv[0] = SREG_READ("S3_1_C15_C2_0");
+	configv[1] = SREG_READ("S3_1_C15_C3_0");
+	configv[2] = SREG_READ("S3_1_C15_C4_0");
+	configv[3] = SREG_READ("S3_1_C15_C7_0");
+	configv[4] = SREG_READ("S3_1_C15_C8_0");
+	configv[5] = SREG_READ("S3_1_C15_C9_0");
+	configv[6] = SREG_READ("S3_1_C15_C10_0");
 #if RAWPMU_CONFIG_COUNT > 7
-	configv[7] = SREG_READ("PMMMAP_EL1");
-	configv[8] = SREG_READ("PMTRHLD2_EL1");
-	configv[9] = SREG_READ("PMTRHLD4_EL1");
-	configv[10] = SREG_READ("PMTRHLD6_EL1");
+	configv[7] = SREG_READ("S3_2_C15_C15_0");
+	configv[8] = SREG_READ("S3_2_C15_C14_0");
+	configv[9] = SREG_READ("S3_2_C15_C13_0");
+	configv[10] = SREG_READ("S3_2_C15_C12_0");
 #endif
 	return 0;
 }
@@ -367,18 +367,18 @@ kpc_get_rawpmu_config(kpc_config_t *configv)
 static int
 kpc_set_rawpmu_config(kpc_config_t *configv)
 {
-	SREG_WRITE("PMCR2_EL1", configv[0]);
-	SREG_WRITE("PMCR3_EL1", configv[1]);
-	SREG_WRITE("PMCR4_EL1", configv[2]);
-	SREG_WRITE("OPMAT0_EL1", configv[3]);
-	SREG_WRITE("OPMAT1_EL1", configv[4]);
-	SREG_WRITE("OPMSK0_EL1", configv[5]);
-	SREG_WRITE("OPMSK1_EL1", configv[6]);
+	SREG_WRITE("S3_1_C15_C2_0", configv[0]);
+	SREG_WRITE("S3_1_C15_C3_0", configv[1]);
+	SREG_WRITE("S3_1_C15_C4_0", configv[2]);
+	SREG_WRITE("S3_1_C15_C7_0", configv[3]);
+	SREG_WRITE("S3_1_C15_C8_0", configv[4]);
+	SREG_WRITE("S3_1_C15_C9_0", configv[5]);
+	SREG_WRITE("S3_1_C15_C10_0", configv[6]);
 #if RAWPMU_CONFIG_COUNT > 7
-	SREG_WRITE("PMMMAP_EL1", configv[7]);
-	SREG_WRITE("PMTRHLD2_EL1", configv[8]);
-	SREG_WRITE("PMTRHLD4_EL1", configv[9]);
-	SREG_WRITE("PMTRHLD6_EL1", configv[10]);
+	SREG_WRITE("S3_2_C15_C15_0", configv[7]);
+	SREG_WRITE("S3_2_C15_C14_0", configv[8]);
+	SREG_WRITE("S3_2_C15_C13_0", configv[9]);
+	SREG_WRITE("S3_2_C15_C12_0", configv[10]);
 #endif
 	return 0;
 }
@@ -393,13 +393,13 @@ save_regs(void)
 	assert(ml_get_interrupts_enabled() == FALSE);
 
 	/* Save event selections. */
-	saved_PMESR[cpuid][0] = SREG_READ("PMESR0_EL1");
-	saved_PMESR[cpuid][1] = SREG_READ("PMESR1_EL1");
+	saved_PMESR[cpuid][0] = SREG_READ("S3_1_C15_C5_0");
+	saved_PMESR[cpuid][1] = SREG_READ("S3_1_C15_C6_0");
 
 	kpc_get_rawpmu_config(saved_RAWPMU[cpuid]);
 
 	/* Disable the counters. */
-	// SREG_WRITE("PMCR0_EL1", clear);
+	// SREG_WRITE("S3_1_C15_C0_0", clear);
 
 	/* Finally, save state for each counter*/
 	for (int i = 2; i < KPC_ARM64_PMC_COUNT; i++) {
@@ -413,8 +413,8 @@ restore_regs(void)
 	int cpuid = cpu_number();
 
 	/* Restore PMESR values. */
-	SREG_WRITE("PMESR0_EL1", saved_PMESR[cpuid][0]);
-	SREG_WRITE("PMESR1_EL1", saved_PMESR[cpuid][1]);
+	SREG_WRITE("S3_1_C15_C5_0", saved_PMESR[cpuid][0]);
+	SREG_WRITE("S3_1_C15_C6_0", saved_PMESR[cpuid][1]);
 
 	kpc_set_rawpmu_config(saved_RAWPMU[cpuid]);
 
@@ -424,7 +424,7 @@ restore_regs(void)
 	}
 
 	/* Restore PMCR0/1 values (with PMCR0 last to enable). */
-	SREG_WRITE("PMCR1_EL1", saved_PMCR[cpuid][1] | 0x30303);
+	SREG_WRITE("S3_1_C15_C1_0", saved_PMCR[cpuid][1] | 0x30303);
 }
 
 static uint64_t
@@ -437,7 +437,7 @@ get_counter_config(uint32_t counter)
 	case 3:         /* FALLTHROUGH */
 	case 4:         /* FALLTHROUGH */
 	case 5:
-		pmesr = PMESR_EVT_DECODE(SREG_READ("PMESR0_EL1"), counter, 2);
+		pmesr = PMESR_EVT_DECODE(SREG_READ("S3_1_C15_C5_0"), counter, 2);
 		break;
 	case 6:         /* FALLTHROUGH */
 	case 7:
@@ -446,7 +446,7 @@ get_counter_config(uint32_t counter)
 	case 8:         /* FALLTHROUGH */
 	case 9:
 #endif
-		pmesr = PMESR_EVT_DECODE(SREG_READ("PMESR1_EL1"), counter, 6);
+		pmesr = PMESR_EVT_DECODE(SREG_READ("S3_1_C15_C6_0"), counter, 6);
 		break;
 	default:
 		pmesr = 0;
@@ -455,7 +455,7 @@ get_counter_config(uint32_t counter)
 
 	kpc_config_t config = pmesr;
 
-	uint64_t pmcr1 = SREG_READ("PMCR1_EL1");
+	uint64_t pmcr1 = SREG_READ("S3_1_C15_C1_0");
 
 	if (pmcr1 & PMCR1_EL0_A32_ENABLE_MASK(counter)) {
 		config |= CFGWORD_EL0A32EN_MASK;
@@ -489,10 +489,10 @@ set_counter_config(uint32_t counter, uint64_t config)
 	case 3:         /* FALLTHROUGH */
 	case 4:         /* FALLTHROUGH */
 	case 5:
-		pmesr = SREG_READ("PMESR0_EL1");
+		pmesr = SREG_READ("S3_1_C15_C5_0");
 		pmesr &= PMESR_EVT_CLEAR(counter, 2);
 		pmesr |= PMESR_EVT_ENCODE(config, counter, 2);
-		SREG_WRITE("PMESR0_EL1", pmesr);
+		SREG_WRITE("S3_1_C15_C5_0", pmesr);
 		saved_PMESR[cpuid][0] = pmesr;
 		break;
 
@@ -503,10 +503,10 @@ set_counter_config(uint32_t counter, uint64_t config)
 	case 8:         /* FALLTHROUGH */
 	case 9:
 #endif
-		pmesr = SREG_READ("PMESR1_EL1");
+		pmesr = SREG_READ("S3_1_C15_C6_0");
 		pmesr &= PMESR_EVT_CLEAR(counter, 6);
 		pmesr |= PMESR_EVT_ENCODE(config, counter, 6);
-		SREG_WRITE("PMESR1_EL1", pmesr);
+		SREG_WRITE("S3_1_C15_C6_0", pmesr);
 		saved_PMESR[cpuid][1] = pmesr;
 		break;
 	default:

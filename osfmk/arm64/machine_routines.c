@@ -184,15 +184,15 @@ ml_cpu_signal_type(unsigned int cpu_mpidr, uint32_t type)
 	MRS(local_mpidr, "MPIDR_EL1");
 	if (MPIDR_CLUSTER_ID(local_mpidr) == MPIDR_CLUSTER_ID(cpu_mpidr)) {
 		uint64_t x = type | MPIDR_CPU_ID(cpu_mpidr);
-		MSR("IPIRR_LOCAL_EL1", x);
+		MSR("S3_5_C15_C0_0", x);
 	} else {
 		#define IPI_RR_TARGET_CLUSTER_SHIFT 16
 		uint64_t x = type | (MPIDR_CLUSTER_ID(cpu_mpidr) << IPI_RR_TARGET_CLUSTER_SHIFT) | MPIDR_CPU_ID(cpu_mpidr);
-		MSR("IPIRR_GLOBAL_EL1", x);
+		MSR("S3_5_C15_C0_1", x);
 	}
 #else
 	uint64_t x = type | MPIDR_CPU_ID(cpu_mpidr);
-	MSR("IPIRR_GLOBAL_EL1", x);
+	MSR("S3_5_C15_C0_1", x);
 #endif
 }
 #endif
@@ -236,7 +236,7 @@ ml_cpu_signal_deferred_adjust_timer(uint64_t nanosecs)
 	/* update deferred_ipi_timer_ns with the new clamped value */
 	absolutetime_to_nanoseconds(abstime, &deferred_ipi_timer_ns);
 
-	MSR("IPICR_EL1", abstime);
+	MSR("S3_5_C15_C3_1", abstime);
 #else
 	(void)nanosecs;
 	panic("Platform does not support ACC Fast IPI");
